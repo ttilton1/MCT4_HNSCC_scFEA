@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # ==============================================================================
-# 31_cptac_protein_check.py  --  does the MCT4 finding hold at the PROTEIN level?
+# 31_cptac_protein.py  --  does the MCT4 finding hold at the PROTEIN level?
 #
-#   python 31_cptac_protein_check.py
+#   python 31_cptac_protein.py
 #
 # WHY THIS IS THE IHC SUBSTITUTE.
 # Every result so far is RNA-derived: scFEA flux comes from expression, and the

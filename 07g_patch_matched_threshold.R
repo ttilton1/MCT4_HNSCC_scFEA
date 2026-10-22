@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 # ==============================================================================
-# 07c_patch_matched.R  --  rewrite module_grounding_final.csv with the matched
+# 07g_patch_matched_threshold.R  --  rewrite module_grounding_final.csv with the matched
 #                          threshold, so everything downstream picks it up
 #
-#   Rscript 07c_patch_matched.R --arm bulk_before
+#   Rscript 07g_patch_matched_threshold.R --arm bulk_before
 #
 # 07c computes null_bar as the 99.9th percentile of INDIVIDUAL random-gene
 # correlations. The statistic actually tested is the maximum across a module's
