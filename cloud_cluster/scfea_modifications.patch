@@ -1,0 +1,156 @@
+diff --git a/src/scFEA.py b/src/scFEA.py
+index b773f6d..7c1d61a 100644
+--- a/src/scFEA.py
++++ b/src/scFEA.py
+@@ -1,7 +1,11 @@
+-# -*- coding: utf-8 -*-
+ """
+ 
+ @author: wnchang@iu.edu
++
++Modified by Tommy Tilton (USC Lin Lab):
++  - Added --mode (train/predict) and --model_file for large-scale analysis
++  - GPU compatibility fix: .cpu() before .numpy()
++  - File path fixes: use res_dir consistently
+ """
+ 
+ # system lib
+@@ -86,6 +90,8 @@ def main(args):
+     fileName = args.output_flux_file
+     balanceName = args.output_balance_file
+     EPOCH = args.train_epoch
++    mode = args.mode
++    model_file = args.model_file
+ 
+     if EPOCH <= 0:
+         raise NameError('EPOCH must greater than 1!')
+@@ -105,6 +111,7 @@ def main(args):
+         with warnings.catch_warnings():
+             warnings.simplefilter("ignore")
+             geneExpr = magic_operator.fit_transform(geneExpr)
++    print("LOGCHECK max=%.2f -> log2=%s" % (geneExpr.max().max(), geneExpr.max().max() > 50))
+     if geneExpr.max().max() > 50:
+         geneExpr = (geneExpr + 1).apply(np.log2)
+     geneExprSum = geneExpr.sum(axis=1)
+@@ -190,6 +197,20 @@ def main(args):
+     #NN
+     torch.manual_seed(16)
+     net = FLUX(X, n_modules, f_in = n_genes, f_out = 1).to(device)
++
++    # --- PREDICT MODE: load saved model, skip training ---
++    if mode == 'predict':
++        print("\n=== MODE: PREDICT (loading saved model) ===")
++        if model_file == 'NULL':
++            raise FileNotFoundError("--model_file required for predict mode")
++        checkpoint = torch.load(model_file, map_location=device)
++        net.load_state_dict(checkpoint['model_state_dict'])
++        print("Loaded model from:", model_file)
++        timestr = time.strftime("%Y%m%d-%H%M%S")
++
++    # --- TRAIN MODE: train as normal ---
++    else:
++        print("\n=== MODE: TRAIN ===")
+         optimizer = torch.optim.Adam(net.parameters(), lr = LEARN_RATE)
+ 
+         #Dataloader
+@@ -202,11 +223,6 @@ def main(args):
+         train_loader = torch.utils.data.DataLoader(dataset=dataSet,
+                                                    **dataloader_params)
+ 
+-# =============================================================================
+-
+-  
+-   
+-    
+     # =============================================================================
+         print("Starting train neural network...")
+         start = time.time()
+@@ -218,7 +234,7 @@ def main(args):
+         loss_v4 = []
+         net.train()
+         timestr = time.strftime("%Y%m%d-%H%M%S")
+-    lossName = "./output/lossValue_" + timestr + ".txt"
++        lossName = res_dir + "/lossValue_" + timestr + ".txt"
+         file_loss = open(lossName, "a")
+         for epoch in tqdm(range(EPOCH)):
+             loss, loss1, loss2, loss3, loss4 = 0,0,0,0,0
+@@ -264,14 +280,29 @@ def main(args):
+         plt.plot(loss_v3)
+         plt.plot(loss_v4)
+         plt.legend(['total', 'balance', 'negative', 'cellVar', 'moduleVar']);
+-    imgName = './' + res_dir + '/loss_' + timestr + ".png"
++        imgName = res_dir + '/loss_' + timestr + ".png"
+         plt.savefig(imgName)
+-    timeName =  './' + res_dir + '/time_' + timestr + ".txt"
++        timeName =  res_dir + '/time_' + timestr + ".txt"
+         f = open(timeName, "a")
+         runTimeStr = str(end - start)
+         f.write(runTimeStr)
+         f.close()
+ 
++        # --- Save trained model ---
++        if model_file == 'NULL':
++            model_file = res_dir + '/trained_model_' + timestr + '.pt'
++        torch.save({
++            'model_state_dict': net.state_dict(),
++            'n_modules': n_modules,
++            'n_genes': n_genes,
++            'n_comps': n_comps,
++        }, model_file)
++        print("Saved trained model to:", model_file)
++
++
++# =============================================================================
++#    Prediction (shared by both train and predict modes)
++# =============================================================================
+ 
+ #    Dataloader
+     dataloader_params = {'batch_size': 1,
+@@ -296,15 +327,15 @@ def main(args):
+             out_m_batch, out_c_batch = net(X_batch, n_modules, n_genes, n_comps, cmMat)
+ 
+             # save data
+-            fluxStatuTest[i, :] = out_m_batch.detach().numpy()
+-            balanceStatus[i, :] = out_c_batch.detach().numpy()
++            fluxStatuTest[i, :] = out_m_batch.detach().cpu().numpy()
++            balanceStatus[i, :] = out_c_batch.detach().cpu().numpy()
+ 
+ 
+ 
+     # save to file
+     if fileName == 'NULL':
+         # user do not define file name of flux
+-        fileName = "./" + res_dir + "/" + test_file[-len(test_file):-4] + "_module" + str(n_modules) + "_cell" + str(n_cells) + "_batch" + str(BATCH_SIZE) + \
++        fileName = res_dir + "/" + test_file[-len(test_file):-4] + "_module" + str(n_modules) + "_cell" + str(n_cells) + "_batch" + str(BATCH_SIZE) + \
+                     "_LR" + str(LEARN_RATE) + "_epoch" + str(EPOCH) + "_SCimpute_" + str(sc_imputation)[0] + \
+                     "_lambBal" + str(LAMB_BA) + "_lambSca" + str(LAMB_NG) + "_lambCellCor" + str(LAMB_CELL) + "_lambModCor_1e-2" + \
+                     '_' + timestr + ".csv"
+@@ -320,7 +351,7 @@ def main(args):
+         setB.columns = cName
+     if balanceName == 'NULL':
+         # user do not define file name of balance
+-        balanceName = "./output/balance_" + timestr + ".csv"
++        balanceName = res_dir + "/balance_" + timestr + ".csv"
+     setB.to_csv(balanceName)
+ 
+ 
+@@ -333,6 +364,7 @@ def main(args):
+ def parse_arguments(parser):
+ 
+ 
++
+     parser.add_argument('--data_dir', type=str, default='data', metavar='<data_directory>',
+                         help='The data directory for scFEA model files.')
+     parser.add_argument('--input_dir', type=str, default='input', metavar='<input_directory>',
+@@ -355,6 +387,11 @@ def parse_arguments(parser):
+                         help='User defined predicted balance file name.')
+     parser.add_argument('--train_epoch', type=int, default=100, nargs='?',
+                         help='User defined EPOCH (training iteration).')
++    # --- Added for train/predict mode ---
++    parser.add_argument('--mode', type=str, default='train', choices=['train', 'predict'],
++                        help='Mode: "train" to train and predict, "predict" to load saved model and predict only.')
++    parser.add_argument('--model_file', type=str, default='NULL',
++                        help='Path to save (train) or load (predict) model weights.')
+ 
+ 
+ 

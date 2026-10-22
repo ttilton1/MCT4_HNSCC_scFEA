@@ -7,7 +7,7 @@
 #   bash run_all.sh --from 07b   # resume at a step
 #   bash run_all.sh --list       # print the order and stop
 #
-# Stage 0 and Stage 1 run on a cluster and are NOT invoked here; see cluster/ and
+# Stage 0 and Stage 1 run on a cluster and are NOT invoked here; see cloud_cluster/ and
 # the README. This script starts from assembled scFEA flux output and carries
 # through to the figures and tables.
 #
@@ -107,7 +107,7 @@ cat <<'EOF'
 Done.
 
 Not run by this script:
-  cluster/              Stages 0-1 (MAGIC + scFEA) -- submit on the cluster first
+  cloud_cluster/              Stages 0-1 (MAGIC + scFEA) -- submit on the cluster first
   31_cptac_protein.py   needs the cptac 1.5.14 environment:
                           conda activate cptac_env && python 31_cptac_protein.py
                         run it before fig5, which reads its three CSVs

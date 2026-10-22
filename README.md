@@ -58,9 +58,9 @@ The analysis unit is **patient × tissue × cell subtype**, requiring ≥10 cell
 
 | Script | Produces |
 |---|---|
-| `cluster/all_sites/shared/00a_export_normalized_sparse.R` | `normalized.mtx`, `genes.txt`, `barcodes.txt`, `cell_metadata.csv` |
-| `cluster/all_sites/shared/00b_magic_impute.py --solver exact` | `imputed_expression.csv` (661 metabolic genes × cells) |
-| `cluster/all_sites/shared/00c_transpose_imputed.py` | scFEA orientation |
+| `cloud_cluster/all_sites/shared/00a_export_normalized_sparse.R` | `normalized.mtx`, `genes.txt`, `barcodes.txt`, `cell_metadata.csv` |
+| `cloud_cluster/all_sites/shared/00b_magic_impute.py --solver exact` | `imputed_expression.csv` (661 metabolic genes × cells) |
+| `cloud_cluster/all_sites/shared/00c_transpose_imputed.py` | scFEA orientation |
 
 MAGIC runs once per major cell type, with the neighbourhood graph built on all genes and
 only the 661 scFEA module genes returned. Both arms read the same imputed matrices, so
@@ -71,9 +71,9 @@ type needs a largemem node — see `00b_magic_t.slurm`.
 
 | Script | Produces |
 |---|---|
-| `cluster/all_sites/bulk_before/01_export_bulk_before.R` | `train_expression.csv`, `metadata_units.csv` |
-| `cluster/all_sites/bulk_before/02_scfea_bulk_before.slurm` | module flux per unit |
-| `cluster/all_sites/bulk_after/01_export_bulk_after.R` → `02_train` → `03_predict` | per-cell flux (secondary arm) |
+| `cloud_cluster/all_sites/bulk_before/01_export_bulk_before.R` | `train_expression.csv`, `metadata_units.csv` |
+| `cloud_cluster/all_sites/bulk_before/02_scfea_bulk_before.slurm` | module flux per unit |
+| `cloud_cluster/all_sites/bulk_after/01_export_bulk_after.R` → `02_train` → `03_predict` | per-cell flux (secondary arm) |
 
 ### Stage 2 — assemble
 
@@ -158,11 +158,33 @@ paper:
 
 ---
 
+## Modified scFEA
+
+Flux was estimated with a modified copy of scFEA, against upstream commit
+`4c1fb76d52f07bafad84ce7686ad7c3acfcf0126` (9 November 2022). The changes are in
+`cloud_cluster/scfea_modifications.patch`:
+
+- `--mode {train,predict}` and `--model_file`, so a model trained on a subset can be
+  applied to the full atlas
+- `.cpu()` before `.numpy()`, since PyTorch tensors on a GPU cannot convert directly
+- output paths respect `--res_dir` rather than a hardcoded `./output/`
+
+Apply with:
+
+```bash
+git clone https://github.com/changwn/scFEA.git
+cd scFEA && git checkout 4c1fb76d52f07bafad84ce7686ad7c3acfcf0126
+git apply /path/to/scfea_modifications.patch
+```
+
+Hyperparameters were left at the code defaults (`LEARN_RATE` 0.008, `LAMB_BA` 1,
+`LAMB_NG` 1, `LAMB_CELL` 1, `LAMB_MOD` 1e-2, `torch.manual_seed(16)`,
+`--train_epoch 100`), set explicitly in every submission script and identical across
+both arms.
+
+---
+
 ## Known gaps
 
-- **scFEA was modified** to add `--mode {train,predict}` and `--model_file`, and to call
-  `.cpu()` before `.numpy()` for GPU tensors, against upstream commit
-  `4c1fb76d52f07bafad84ce7686ad7c3acfcf0126` (9 November 2022). That patch is not yet in
-  this repository; the flux step cannot be reproduced without it.
 - `jt_test()` (Jonckheere–Terpstra) is defined separately in `05`, `05c` and `09` rather
   than sourced from one place.
