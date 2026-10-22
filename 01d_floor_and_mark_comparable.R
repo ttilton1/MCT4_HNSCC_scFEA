@@ -1,35 +1,19 @@
 #!/usr/bin/env Rscript
-# ==============================================================================
 # 01d_floor_and_mark_comparable.R
-#
-#   Rscript 01d_floor_and_mark_comparable.R --arm bulk_after
-#
-# 01c established two things:
-#
-#  1. FLOORING AT ZERO IS SAFE. Removing negative predictions changes total flux
-#     mass by 0.13%, preserves within-unit module ranking (median rho 0.9951),
-#     and is EXACTLY neutral (rho = 1.0000) for every module carrying a claim:
-#     M_78 (lactate export), M_6 (LDH), M_2, M_113, M_116 -- all 0% negative.
-#     Negative per-cell scFEA output is regression noise around zero for modules
-#     with little enzyme expression in that cell; pseudobulking averaged it away
-#     in bulk_before, per-cell prediction exposes it. It is NOT reverse flux --
-#     the modules are directional.
-#
-#  2. M_3 AND M_4 ARE NOT COMPARABLE ACROSS ARMS. In bulk_after they carry
-#     ~4e-05 median flux, ~270x smaller than M_78, with 37-39% of units negative.
-#     In bulk_before, M_4 was the single largest effect in the study. That is a
-#     real arm disagreement, not a rounding issue, and any M_3/M_4 comparison
-#     between arms would be meaningless. Note also that M_2 (G6P->G3P) carries
-#     100x the flux of M_3 (G3P->3PD) in bulk_after despite being consecutive
-#     steps -- scFEA's balance constraints evidently behave differently at
-#     single-cell resolution than on pseudobulk. Worth stating in methods.
-#
-# This script writes the floored cw (keeping the raw as *_raw.rds) and saves a
-# COMPARABLE MODULE list so downstream cross-arm claims can be restricted to
-# modules that are well-behaved in BOTH arms.
-#
-# After this, 03/04/05c/06/07/09 run unchanged with --arm bulk_after.
-# ==============================================================================
+#   Floor negative flux at zero and record which modules are comparable across
+#   the two arms. Run with --arm bulk_after.
+#   in   data/combined_wide/all_sites/<ARM>/cw_finaltype.rds
+#   out  cw_finaltype.rds (floored; original kept as cw_finaltype_raw.rds)
+#        comparable_modules.rds
+#   note Flooring shifts 0.13% of total flux mass, preserves within-unit module
+#        ranking (median rho 0.9951) and is exactly neutral for every module
+#        carrying a claim: M_78, M_6, M_2, M_113 and M_116 have no negative
+#        values. Negative per-cell output is regression noise around zero for
+#        modules with little enzyme expression, not reverse flux; the modules
+#        are directional.
+#   note M_3 and M_4 are marked not comparable across arms. In bulk_after they
+#        carry ~4e-05 median flux with 37-39% of units negative, whereas M_4 was
+#        the largest single effect in bulk_before.
 source("config_all_sites.R")
 stopifnot(ARM == "bulk_after")
 NEG_TOL <- 0.05      # a module must be <5% negative to be cross-arm comparable

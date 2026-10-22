@@ -1,24 +1,17 @@
 #!/usr/bin/env Rscript
-# ==============================================================================
-# config_all_sites.R -- shared config for the all_sites analysis pipeline.
-# Sourced by every downstream script. Set ARM once; everything else follows.
-#
-#   ARM = "bulk_before"  pseudobulk expression -> scFEA   ( flux(mean) )
-#   ARM = "bulk_after"   scFEA per cell -> pseudobulk     ( mean(flux) )
-#
-# KEY STRUCTURAL FACTS (differ from the old pooled/site-separated pipeline):
-#  1. One model per MAJOR TYPE across ALL sites. So flux IS comparable across
-#     Oral/LN/MR within a major type -- the old "Oral-only / within-model"
-#     guardrail is obsolete. The guardrail that REMAINS: never compare flux
-#     across major types (different trained networks).
-#  2. bulk_before's native unit is (sample x finaltype). Subtype and major-type
-#     levels are ROLLED UP from finaltype units (n_cells-weighted), identically
-#     in both arms, so the arm comparison is not confounded by aggregation.
-#  3. Effect floors from the old run (abs 1e-3, spec 0.01) were tuned to a
-#     different flux scale and do NOT transfer. Absolute floors here are
-#     DATA-DERIVED per arm (see derive_floor). rel_floor (fraction of module
-#     flux) is scale-free and does transfer -- prefer it, esp. for HPV.
-# ==============================================================================
+# config_all_sites.R
+#   Shared configuration, sourced by every script in the pipeline. Sets ARM,
+#   PATHS, GATES and STAGE_MAP. ARM selects the pseudobulking strategy:
+#     bulk_before   pseudobulk expression, then scFEA   (primary, reported)
+#     bulk_after    scFEA per cell, then pseudobulk     (robustness)
+#   unit patient x tissue x finaltype. patient rather than sample avoids
+#        pseudoreplication when a patient gives more than one sample of the same
+#        tissue; tissue rather than site keeps M/R and the normal subtypes apart.
+#   note One scFEA model per major cell type across all sites, so flux is
+#        comparable across sites within a major type and never between them.
+#   note GATES$min_cells = 10, chosen in 02_gate_sweep.R: identical power to a
+#        gate of 8 while removing 350 more degenerate units; 15 loses two
+#        progression comparisons. One gate for every analysis and both arms.
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(readr); library(data.table); library(tibble)
 })

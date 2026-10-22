@@ -1,25 +1,17 @@
 #!/usr/bin/env Rscript
-# ==============================================================================
-# 01_build_combined_wide.R  --  Tier 0. Emits ONE schema for BOTH arms.
-#
-#   Rscript 01_build_combined_wide.R --arm bulk_before
-#   Rscript 01_build_combined_wide.R --arm bulk_after
-#
-# bulk_before: flux is ALREADY per (sample x finaltype) unit -> read it, join
-#              metadata_units.csv, roll sample -> patient (n_cells-weighted).
-# bulk_after : flux is per CELL -> join cell_metadata.csv on barcode, pseudobulk
-#              (mean flux) to patient x tissue x finaltype.
-#
-# BOTH then roll UP identically (n_cells-weighted mean of finaltype units) to
-# subtype (annot_2nd) and major (annot_4th), so the arms differ ONLY in when
-# pseudobulk happened relative to flux -- not in how levels were aggregated.
-#
-# NO GATE IS APPLIED HERE. n_cells travels with every row; gates are applied
-# downstream (see 02_gate_sweep.R) so a threshold change never means a rebuild.
-#
-# Writes -> data/combined_wide/all_sites/<ARM>/
-#             cw_finaltype.rds   cw_subtype.rds   cw_major.rds
-# ==============================================================================
+# 01_build_combined_wide.R
+#   Assemble scFEA flux into one wide table per aggregation level, identically
+#   for both arms. bulk_before flux arrives per unit and is rolled from sample to
+#   patient; bulk_after arrives per cell and is pseudobulked to the unit.
+#   in   output/all_sites/<ARM>/<Type>/ flux, plus metadata_units.csv
+#        (bulk_before) or cell_metadata.csv (bulk_after)
+#   out  data/combined_wide/all_sites/<ARM>/
+#          cw_finaltype.rds  cw_subtype.rds  cw_major.rds
+#   note No gate is applied here. n_cells travels with every row, so changing a
+#        threshold downstream never requires a rebuild.
+#   note Subtype and major-type levels are rolled up from finaltype units by
+#        n_cells-weighted mean in both arms, so the arms differ only in when
+#        pseudobulk happened relative to flux, not in how levels were formed.
 source("config_all_sites.R")
 
 # ---- locate the flux file for a type (handles both naming conventions) --------

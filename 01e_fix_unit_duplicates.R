@@ -1,32 +1,18 @@
 #!/usr/bin/env Rscript
-# ==============================================================================
 # 01e_fix_unit_duplicates.R
-#
-#   Rscript 01e_fix_unit_duplicates.R --arm bulk_after
-#
-# PROBLEM. 03_qc reports 6,126 gated units for bulk_after, but only 5,305 distinct
-# (patient, tissue, finaltype) triples exist. bulk_before has 5,459 rows / 5,431
-# distinct -- essentially one row per unit. So bulk_after is SPLITTING units.
-#
-# CAUSE. 01b aggregated with
-#     by = (patient, tissue, finaltype, annot_2nd, annot_4th, study, hpv, site,
-#           site_group)
-# If ANY of those annotation columns varies within a patient x tissue x finaltype
-# -- e.g. two samples from the same patient/tissue carrying different `site` or
-# `site_group` labels -- the unit fragments into several rows.
-#
-# WHY IT MATTERS. (1) the arms then have different unit counts and the comparison
-# is not like-for-like; (2) fragments hold fewer cells each, so the n_cells >= 10
-# gate removes different things in each arm; (3) near-duplicate rows double-count
-# the same cells in every downstream test.
-#
-# FIX. Re-aggregate to the canonical unit -- patient x tissue x finaltype -- taking
-# the n_cells-weighted mean of flux and, for annotation columns, the value from the
-# largest constituent fragment. This reproduces bulk_before's unit definition
-# exactly, so the arms become comparable.
-#
-# Run AFTER 01b/01d, BEFORE 03/04/05c/06/07/09.
-# ==============================================================================
+#   Re-aggregate bulk_after to the canonical unit so both arms count units the
+#   same way. Run after 01b and 01d, before 03.
+#   in   data/combined_wide/all_sites/bulk_after/cw_finaltype.rds
+#   out  the same file, re-aggregated (previous version kept as
+#        cw_finaltype_fragmented.rds)
+#   note 01b grouped on annotation columns that can vary within one
+#        patient x tissue x finaltype, splitting single units across several
+#        rows: 6,126 gated units against 5,305 distinct triples, where
+#        bulk_before gave 5,459 rows for 5,431 units. Fragments hold fewer cells
+#        each, so the 10-cell gate removed different units in each arm and
+#        near-duplicate rows double-counted the same cells in every test.
+#   note Annotation columns take the value from the largest constituent
+#        fragment; flux is the n_cells-weighted mean.
 source("config_all_sites.R")
 suppressPackageStartupMessages({ library(data.table) })
 stopifnot(ARM == "bulk_after")
