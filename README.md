@@ -8,7 +8,7 @@ Analysis code for:
 
 Metabolic flux is inferred with [scFEA](https://github.com/changwn/scFEA) across 168
 modules (M1–M168) of the M171 network, in 645,351 cells from 114 patients across five
-published HNSCC cohorts. The analysis is organised around **metabolic allocation** — a
+published HNSCC cohorts. The analysis is organised around **metabolic allocation**, defines as a 
 module's flux as a fraction of its unit's total flux so we can compare across cell types. Using
 raw fluxes would not let us compare across major cell types that each have their own
 flux model to fit to.

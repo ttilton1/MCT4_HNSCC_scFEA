@@ -9,7 +9,7 @@
 #SBATCH --time=01:30:00
 #SBATCH --cpus-per-task=8
 #SBATCH --partition=main
-#SBATCH --array=1-9
+#SBATCH --array=2-9   # T is index 1, run separately via 00b_magic_t.slurm (6h; 1.5h times out)
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=ttilton@usc.edu
 
