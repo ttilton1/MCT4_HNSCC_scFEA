@@ -39,7 +39,7 @@ suppressPackageStartupMessages({
   library(patchwork); library(forcats); library(survival)
 })
 
-TC  <- "/Users/Tommy/dechenli_lab_local/scfea26/results/tcga"
+TC  <- paste0(Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26"), "/results/tcga")
 OUT <- file.path(TC, "fig6"); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
 
 uni <- read_csv(file.path(TC, "cox_univariate.csv"), show_col_types = FALSE)

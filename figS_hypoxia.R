@@ -55,7 +55,7 @@
 # Output -> results/tcga/figS_hypoxia/
 # ==============================================================================
 suppressPackageStartupMessages({ library(ggplot2); library(dplyr); library(readr); library(tidyr) })
-TC  <- "/Users/Tommy/dechenli_lab_local/scfea26/results/tcga"
+TC  <- paste0(Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26"), "/results/tcga")
 OUT <- file.path(TC, "figS_hypoxia"); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
 
 d <- read_csv(file.path(TC, "per_patient_scores.csv"), show_col_types = FALSE)

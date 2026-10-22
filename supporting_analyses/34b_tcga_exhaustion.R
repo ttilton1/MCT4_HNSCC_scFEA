@@ -18,7 +18,7 @@
 # ==============================================================================
 suppressPackageStartupMessages({ library(data.table); library(dplyr); library(ggplot2); library(readr) })
 say <- function(...) message(sprintf(...))
-ROOT <- "/Users/Tommy/dechenli_lab_local/scfea26"
+ROOT <- Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26")
 OUT  <- file.path(ROOT,"results/tcell_dysfunction/tcga"); dir.create(OUT,recursive=TRUE,showWarnings=FALSE)
 EXPR <- file.path(ROOT,"tcga/hnsc_tcga_pan_can_atlas_2018/data_mrna_seq_v2_rsem.txt")
 

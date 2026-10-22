@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # ==============================================================================
-# 30_tcga_signature.R  --  does the CM01 lactate-export program matter in TCGA?
+# 30_tcga_signature.R  --  does the lactate metabolic program matter in TCGA?
 #
 #   Rscript 30_tcga_signature.R
 #
@@ -11,12 +11,12 @@
 #   CAN:    cohort-scale survival, and HPV stratification with real sample sizes
 #           (unlike the sparse HPV+ in the oral scRNA cohorts).
 #
-# THE ONE QUESTION THAT DECIDES NOVELTY vs MENG.
-#   Meng already showed SPP1+ TAM infiltration -> worse OS in TCGA. So SPP1 alone
+# WHETHER THE SIGNATURE IS PROGNOSTIC INDEPENDENTLY OF SPP1.
+#   Meng et al. reported SPP1+ TAM infiltration -> worse OS in TCGA. So SPP1 alone
 #   being prognostic is NOT new. The test that matters: does the EXPORT-SPECIFIC
 #   gene SLC16A3 (MCT4) add prognostic value OVER SPP1? If a Cox model with
 #   SLC16A3 beats SPP1-only (likelihood-ratio test), the export program is a
-#   distinct signal. If SPP1 carries everything, we are re-deriving Meng.
+#   distinct signal. If SPP1 carries everything, the signature adds nothing beyond SPP1.
 #
 # STEPS
 #   1. pull TCGA-HNSC expression + clinical (TCGAbiolinks) OR read a local matrix
@@ -32,13 +32,13 @@
 suppressPackageStartupMessages({
   library(dplyr); library(tidyr); library(readr); library(survival); library(ggplot2)
 })
-ROOT <- "/Users/Tommy/dechenli_lab_local/scfea26"
+ROOT <- Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26")
 OUT  <- file.path(ROOT, "results", "tcga"); dir.create(OUT, recursive=TRUE, showWarnings=FALSE)
 say  <- function(...) message(sprintf(...))
 
 # ---- the signature -----------------------------------------------------------
 EXPORT_CORE <- c("SLC16A3", "LDHA", "HK2")           # the export-specific program
-NICHE_ID    <- c("SPP1", "MMP11")                    # niche identity (Meng owns SPP1)
+NICHE_ID    <- c("SPP1", "MMP11")                    # niche identity (SPP1 is the established marker, Meng et al.)
 HYPOXIA     <- c("CA9", "VEGFA")                     # context (weak in our data; test anyway)
 SIG <- unique(c(EXPORT_CORE, NICHE_ID, HYPOXIA))
 
@@ -169,8 +169,8 @@ say("  Likelihood-ratio test (does SLC16A3 add signal over SPP1?): p = %.4g",
     lrt$`P(>|Chi|)`[2])
 print(as.data.frame(round(summary(m_both)$coef, 4)))
 say("  READ: if LRT p < 0.05 and SLC16A3's own p < 0.05, the export program is")
-say("  prognostic INDEPENDENT of SPP1 -- i.e. distinct from Meng's SPP1 result.")
-say("  If not, SPP1 carries the signal and we are re-deriving Meng.")
+say("  prognostic INDEPENDENT of SPP1 -- i.e. not explained by SPP1 alone.")
+say("  If not, SPP1 carries the signal.")
 capture.output(list(spp1=summary(m_spp1), both=summary(m_both), lrt=lrt),
                file=file.path(OUT, "incremental_cox.txt"))
 
@@ -292,7 +292,7 @@ km <- broom::tidy(fit) %>% mutate(grp = sub("grp=","",strata))
 kp <- ggplot(km, aes(time/365.25, estimate, colour=grp)) +
   geom_step(linewidth=1) +
   scale_colour_manual(values=c(high="#b2182b", low="#4393c3")) +
-  labs(title="CM01 lactate-export signature and overall survival (TCGA-HNSC)",
+  labs(title="lactate metabolic signature and overall survival (TCGA-HNSC)",
        subtitle=sprintf("median split, log-rank p = %.3g", pval),
        x="years", y="overall survival", colour="signature") +
   coord_cartesian(ylim=c(0,1)) + theme_bw(base_size=12)
@@ -301,4 +301,4 @@ say("\nKM log-rank p = %.3g", pval)
 
 say("\n-> %s", OUT)
 say("HEADLINE to check: (1) export_core HR>1 and significant; (2) SLC16A3 LRT over")
-say("SPP1 significant (= distinct from Meng); (3) signature higher in HPV-.")
+say("SPP1 significant (= independent of SPP1); (3) signature higher in HPV-.")

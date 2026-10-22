@@ -22,8 +22,8 @@ suppressPackageStartupMessages({
 })
 say <- function(...) message(sprintf(...))
 
-DIR <- "/Users/Tommy/dechenli_lab_local/scfea26/data/independent/GSE164690_RAW"
-OUT <- "/Users/Tommy/dechenli_lab_local/scfea26/data/independent/kurten_GSE164690.rds"
+DIR <- paste0(Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26"), "/data/independent/GSE164690_RAW")
+OUT <- paste0(Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26"), "/data/independent/kurten_GSE164690.rds")
 
 KEEP_FRACTIONS <- c("CD45p", "CD45n")   # drop PBL (blood)
 

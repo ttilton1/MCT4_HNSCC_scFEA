@@ -37,7 +37,7 @@ suppressPackageStartupMessages({
   library(survival); library(ggplot2)
 })
 say <- function(...) message(sprintf(...))
-ROOT <- "/Users/Tommy/dechenli_lab_local/scfea26"
+ROOT <- Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26")
 OUT  <- file.path(ROOT, "results/tcga/deconvolution")
 dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
 
@@ -142,7 +142,7 @@ write_csv(tibble(
 
 # ============ sensitivity: SPP1 the same way =================================
 if (!all(is.na(df$SPP1))) {
-  say("\n=== sensitivity: same test for SPP1 (Meng's marker) ===")
+  say("\n=== sensitivity: same test for SPP1 (the established SPP1 marker, Meng et al.) ===")
   s1 <- coxph(as.formula(sprintf("Surv(OS.time,OS) ~ SPP1 + age %s", adj)), data=df)
   s2 <- coxph(as.formula(sprintf("Surv(OS.time,OS) ~ SPP1 + myeloid + age %s", adj)), data=df)
   a <- grab(s1,"SPP1"); b <- grab(s2,"SPP1")

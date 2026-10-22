@@ -23,7 +23,7 @@ if (!exists("ARM")) {
 }
 stopifnot(ARM %in% c("bulk_before", "bulk_after"))
 
-ROOT <- "/Users/Tommy/dechenli_lab_local/scfea26"
+ROOT <- Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26")
 
 PATHS <- list(
   flux_dir   = file.path(ROOT, "output",   "all_sites", ARM),   # <Type>/ flux

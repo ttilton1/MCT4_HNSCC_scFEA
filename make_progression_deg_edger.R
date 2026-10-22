@@ -23,7 +23,7 @@ suppressPackageStartupMessages({
   library(Seurat); library(Matrix); library(dplyr); library(readr); library(edgeR)
 })
 
-ROOT     <- "/Users/Tommy/dechenli_lab_local/scfea26"
+ROOT     <- Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26")
 OBJ      <- file.path(ROOT, "data/obj.final.2.0.rda")
 OUT      <- file.path(ROOT, "results/deg"); dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
 FLUXSET  <- file.path(ROOT, "results/all_sites/bulk_before/fig4/fig4D_expression_ratio_paired.csv")

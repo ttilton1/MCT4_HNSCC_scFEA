@@ -50,7 +50,7 @@ TISS  <- getarg("--tissue")        # metadata column with tumor/normal (optional
 TUMOR_ONLY <- "--tumor_only" %in% a || "--tumour_only" %in% a  # restrict to tumor tissue
 if (is.null(OBJ)) stop("usage: --obj <seurat.rds> [--celltype col] [--sample col] [--tissue col]")
 
-ROOT <- "/Users/Tommy/dechenli_lab_local/scfea26"
+ROOT <- Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26")
 OUT  <- file.path(ROOT, "results", "independent", NAME)
 dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
 

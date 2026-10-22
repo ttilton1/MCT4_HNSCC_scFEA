@@ -22,8 +22,8 @@ suppressPackageStartupMessages({
 })
 say <- function(...) message(sprintf(...))
 
-DIR <- "/Users/Tommy/dechenli_lab_local/scfea26/data/independent/GSE139324_RAW"
-OUT <- "/Users/Tommy/dechenli_lab_local/scfea26/data/independent/cillo_GSE139324.rds"
+DIR <- paste0(Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26"), "/data/independent/GSE139324_RAW")
+OUT <- paste0(Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26"), "/data/independent/cillo_GSE139324.rds")
 
 # ---- discover samples from the matrix files ----------------------------------
 mtx <- list.files(DIR, pattern = "_matrix\\.mtx\\.gz$", full.names = TRUE)

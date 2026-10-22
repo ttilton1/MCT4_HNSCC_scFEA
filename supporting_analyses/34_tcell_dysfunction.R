@@ -45,7 +45,7 @@ getarg <- function(k, d=NULL) if (k %in% a) a[which(a==k)+1] else d
 COHORT <- getarg("--cohort"); OBJ <- getarg("--obj"); ARM <- getarg("--arm","bulk_before")
 if (is.null(COHORT)) stop("--cohort atlas|cillo|kurten required")
 
-ROOT <- "/Users/Tommy/dechenli_lab_local/scfea26"
+ROOT <- Sys.getenv("SCFEA_ROOT", unset = "/Users/Tommy/dechenli_lab_local/scfea26")
 OUT  <- file.path(ROOT, "results", "tcell_dysfunction", COHORT)
 dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
 

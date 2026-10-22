@@ -14,7 +14,7 @@
 # Our headline is the THIRD term (05c: MCT flux share rises). But if the first
 # term drives everything -- if there are simply more SPP1+ TAM / MMP11+ CAF in
 # carcinoma -- then the "metabolic reprogramming" framing collapses into "more
-# TAMs", which is essentially Meng. The finding is only distinct if ALLOCATION
+# TAMs", which is the infiltration result of Meng et al. The finding is only distinct if ALLOCATION
 # rises INDEPENDENT of abundance.
 #
 # This is the compositional-vs-intrinsic split flagged in the old Axis 2 write-up
@@ -33,8 +33,8 @@ dir.create(OUT, recursive = TRUE, showWarnings = FALSE)
 # the niche cell states + their markers + the export module
 NICHE <- tribble(
   ~celltype,    ~finaltype,     ~marker,  ~note,
-  "Myeloid",    "MQ_C4_SPP1",   "SPP1",   "SPP1+ TAM (CM01)",
-  "Fibroblast", "FB_C1_MMP11",  "MMP11",  "MMP11+ CAF (CM01)",
+  "Myeloid",    "MQ_C4_SPP1",   "SPP1",   "SPP1+ TAM",
+  "Fibroblast", "FB_C1_MMP11",  "MMP11",  "MMP11+ CAF",
   "Myeloid",    "DC_C2_cDC2",   "CLEC10A","cDC2")
 EXPORT_MODULE <- "M_78"
 
@@ -147,7 +147,7 @@ verdict <- RES %>% filter(!is.na(z)) %>%
 print(as.data.frame(verdict), row.names=FALSE)
 say("\nREAD:")
 say("  If ALLOCATION rises (term 3) INDEPENDENT of ABUNDANCE (term 1), the finding")
-say("  is INTRINSIC metabolic reprogramming -- distinct from Meng's 'more TAMs'.")
+say("  is INTRINSIC metabolic reprogramming -- not explained by increased TAM abundance alone.")
 say("  If only ABUNDANCE rises, the story is compositional and the metabolic claim")
 say("  is weak. If BOTH rise, state both: the niche expands AND commits more per cell.")
 

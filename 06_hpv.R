@@ -20,7 +20,7 @@
 #    (|effect| >= 10% of the module's own share) is the right primary gate.
 #
 #  * TARGETED FIRST, scan second. The headline question is ONE line: is MCT4
-#    lactate export (M_78) higher in HPV- than HPV+? CM01 (SPP1+ TAM, MMP11+ CAF)
+#    lactate export (M_78) higher in HPV- than HPV+? the SPP1+ TAM / MMP11+ CAF niche
 #    is the HPV- niche; if export is HPV--enriched, the metabolic finding and the
 #    CoVarNet niche lock together.
 #
@@ -144,7 +144,7 @@ run_level <- function(level) {
   if (nrow(targ)) {
     print(as.data.frame(targ %>% arrange(match(what, KEY$what), desc(rel))), row.names=FALSE)
     say("\n  READ: MCT export (M_78) 'higher_in = HPV-negative' with concordant cohorts")
-    say("  is the result that ties the lactate finding to the CM01 (HPV-) niche.")
+    say("  is the result that ties the lactate finding to the SPP1+ TAM / MMP11+ CAF niche (HPV-).")
   } else say("  no MCT/LDH/glycolysis contrasts passed coverage in myeloid/stroma")
   write_csv(targ, file.path(OUT, "targeted_lactate_hpv.csv"))
 

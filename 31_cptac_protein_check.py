@@ -35,7 +35,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-OUT = "/Users/Tommy/dechenli_lab_local/scfea26/results/cptac"
+OUT = os.environ.get("SCFEA_ROOT", "/Users/Tommy/dechenli_lab_local/scfea26") + "/results/cptac"
 import os; os.makedirs(OUT, exist_ok=True)
 
 TARGET   = "SLC16A3"                    # MCT4 -- the claim
