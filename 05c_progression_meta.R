@@ -49,7 +49,7 @@ jt_test <- function(x, g, lv) {
   z <- (U - EU)/sqrt(VU); c(z = z, p = 2*pnorm(-abs(z)))
 }
 
-# ---- what does each cohort actually have? (do not assume) ---------------------
+# ---- Confirm what each cohort has via printing them out. ---------------------
 cw0 <- readRDS(file.path(PATHS$cw_dir, "cw_finaltype.rds")) %>% filter(n_cells >= GATES$min_cells)
 say("\n=== tissue x study (patients) -- which cohort can stage carcinoma? ===")
 xt <- cw0 %>% distinct(study, tissue, patient) %>% count(study, tissue) %>%
