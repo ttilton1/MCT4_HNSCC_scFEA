@@ -1,6 +1,0 @@
-name: cptac_env
-channels:
-  - conda-forge
-dependencies:
-  - python=3.10
-prefix: /Users/Tommy/miniforge3/envs/cptac_env

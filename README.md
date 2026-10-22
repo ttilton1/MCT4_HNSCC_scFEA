@@ -36,8 +36,8 @@ tcga/                                  cBioPortal HNSC PanCancer Atlas download
 
 **Requirements.** R 4.2 or later with dplyr, tidyr, readr, data.table, Matrix, ggplot2,
 patchwork, ggtext, survival, edgeR, Seurat. Python 3.7 with `magic-impute` and torch for
-the cluster steps. A separate environment with `cptac==1.5.14` for the proteomics.
-`environment.yml` and `sessionInfo.txt` record the versions we used.
+the cluster steps. A separate environment with `cptac==1.5.14` for the proteomics. See
+`envs/` for what we actually ran in.
 
 **Data not included here.** The five source cohorts (He, Kim, Koh, Pittet, Tirosh) as a
 harmonized Seurat object. TCGA-HNSC from cBioPortal. CPTAC-HNSCC through the `cptac`
@@ -196,12 +196,18 @@ We left the hyperparameters at the code defaults (`LEARN_RATE` 0.008, `LAMB_BA` 
 
 ## Environment
 
-`environment.yml` and `sessionInfo.txt` record the R environment. Two Python environments
-are not in there:
+| File | What it covers |
+|---|---|
+| `envs/local_r_sessionInfo.txt` | R session for Stages 2 to 5 |
+| `envs/local_cptac.yml` | `cptac_env`, Python 3.10, for `31_cptac_protein.py`. cptac 1.5.14, umich pipeline, 182 samples x 12,224 proteins |
+| `envs/cluster_scfea.yml` | `scfea_37`, Python 3.7 with magic-impute and torch, for MAGIC and scFEA |
+| `envs/cluster_r.yml` | `covarnet_r`, for the R steps on the cluster (`00a`, `01_export_bulk_before`, `01_export_bulk_after`) |
 
-- **Proteomics.** `cptac==1.5.14`, umich pipeline (182 samples x 12,224 proteins).
-  Required by `31_cptac_protein.py`.
-- **Cluster.** `scfea_37` (Python 3.7) with `magic-impute` and torch, for Stages 0 and 1.
+`envs/cluster_r.yml` is a snapshot of a shared lab environment, so it records what we ran
+in rather than something we controlled.
+
+A conda export records what was installed, not what the code needs. If rebuilding from
+one hits a solver conflict, use the package list under Requirements instead.
 
 ## Known gaps
 

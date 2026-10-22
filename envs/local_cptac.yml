@@ -1,0 +1,46 @@
+name: cptac_env
+channels:
+  - conda-forge
+dependencies:
+  - bzip2=1.0.8
+  - ca-certificates=2026.7.22
+  - icu=78.3
+  - libexpat=2.8.1
+  - libffi=3.7.0
+  - liblzma=5.8.3
+  - libsqlite=3.53.3
+  - libzlib=1.3.2
+  - ncurses=6.6
+  - openssl=3.6.3
+  - packaging=26.2
+  - pip=26.1.2
+  - python=3.10.20
+  - readline=8.3
+  - setuptools=83.0.0
+  - tk=8.6.13
+  - wheel=0.47.0
+  - pip:
+      - certifi==2026.7.22
+      - charset-normalizer==3.4.9
+      - cptac==1.5.14
+      - et-xmlfile==2.0.0
+      - idna==3.18
+      - natsort==8.4.0
+      - ncls==0.0.70
+      - numpy==2.2.6
+      - openpyxl==3.1.5
+      - pandas==2.3.3
+      - patsy==1.0.2
+      - pyranges==0.1.4
+      - python-dateutil==2.9.0.post0
+      - pytz==2026.2
+      - requests==2.34.2
+      - scipy==1.15.3
+      - six==1.17.0
+      - sorted-nearest==0.0.41
+      - statsmodels==0.14.6
+      - tabulate==0.10.0
+      - tqdm==4.69.1
+      - tzdata==2026.3
+      - urllib3==2.7.0
+prefix: /Users/Tommy/miniforge3/envs/cptac_env
