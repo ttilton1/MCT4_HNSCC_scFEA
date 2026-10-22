@@ -22,6 +22,10 @@ Scripts find the data directory through an environment variable:
 export SCFEA_ROOT=/path/to/your/scfea_data
 ```
 
+To check a rebuild against ours, run `bash check_figure_scripts.sh`. It verifies that
+every input exists, that the matched-null patch ran, and that the figures and tables
+regenerate. It does not recompute flux.
+
 Expected layout under `$SCFEA_ROOT`:
 
 ```
