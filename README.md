@@ -174,7 +174,7 @@ Apply with:
 ```bash
 git clone https://github.com/changwn/scFEA.git
 cd scFEA && git checkout 4c1fb76d52f07bafad84ce7686ad7c3acfcf0126
-git apply /path/to/scfea_modifications.patch
+git apply --ignore-whitespace /path/to/scfea_modifications.patch
 ```
 
 Hyperparameters were left at the code defaults (`LEARN_RATE` 0.008, `LAMB_BA` 1,
@@ -188,3 +188,12 @@ both arms.
 
 - `jt_test()` (Jonckheere–Terpstra) is defined separately in `05`, `05c` and `09` rather
   than sourced from one place.
+
+### Environment
+
+`environment.yml` and `sessionInfo.txt` record the R environment. Two Python
+environments are not captured there:
+
+- **Proteomics** — `cptac==1.5.14`, using the umich pipeline (182 samples × 12,224
+  proteins). Required by `31_cptac_protein.py`.
+- **Cluster** — `scfea_37` (Python 3.7) with `magic-impute` and torch, for Stages 0–1.
