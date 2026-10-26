@@ -196,6 +196,22 @@ We left the hyperparameters at the code defaults (`LEARN_RATE` 0.008, `LAMB_BA` 
 `LAMB_NG` 1, `LAMB_CELL` 1, `LAMB_MOD` 1e-2, `torch.manual_seed(16)`, `--train_epoch
 100`). They are set explicitly in every submission script and are the same in both arms.
 
+The MIT license covers the analysis code here. `scfea_modifications.patch` is a
+modification of scFEA and carries scFEA's own academic, non-commercial license.
+
+---
+
+## Data
+
+Source single-cell cohorts: HRA004648 (He), GSE181919 (Kim), GSE198315 (Koh),
+GSE234933 (Pittet), GSE182227 (Tirosh). HRA004648 is controlled access and requires an
+approved request.
+
+External validation cohorts: GSE139324 (Cillo), GSE164690 (Kürten).
+
+Proteomics: CPTAC-HNSCC through the `cptac` Python package. Survival and bulk expression:
+TCGA-HNSC through cBioPortal.
+
 ---
 
 ## Environment
