@@ -1,7 +1,5 @@
 # MCT4-associated lactate export in HNSCC myeloid cells
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23696767.svg)](https://doi.org/10.5281/zenodo.23696767)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.CONCEPT_ID.svg)](https://doi.org/10.5281/zenodo.CONCEPT_ID)
-
 
 Analysis code for:
 
@@ -219,7 +217,7 @@ TCGA-HNSC through cBioPortal.
 
 ## Environment
 
-| File | What it covers |
+| File | Use |
 |---|---|
 | `envs/local_r_sessionInfo.txt` | R session for Stages 2 to 5 |
 | `envs/local_cptac.yml` | `cptac_env`, Python 3.10, for `31_cptac_protein.py`. cptac 1.5.14, umich pipeline, 182 samples x 12,224 proteins |
