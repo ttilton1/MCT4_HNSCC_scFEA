@@ -213,6 +213,10 @@ External validation cohorts: GSE139324 (Cillo), GSE164690 (Kürten).
 Proteomics: CPTAC-HNSCC through the `cptac` Python package. Survival and bulk expression:
 TCGA-HNSC through cBioPortal.
 
+Pseudobulk expression inputs and inferred flux for the four GEO cohorts are deposited at
+https://doi.org/10.5281/zenodo.23698042. The He cohort (HRA004648) is controlled access and
+is not included there.
+
 ---
 
 ## Environment
