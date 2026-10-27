@@ -153,6 +153,22 @@ print(as.data.frame(cox_tab %>% mutate(across(c(HR,lo,hi),~round(.x,2)), p=signi
       row.names=FALSE)
 write_csv(cox_tab, file.path(OUT, "cox_univariate.csv"))
 
+# ---- proportional hazards check on the reported model ------------------------
+# A Cox HR assumes the hazard ratio is constant over follow-up. cox.zph tests
+# that; a small p for a term means its effect changes with time and the single
+# HR is a summary of something non-constant.
+.ph_d <- df %>% filter(!is.na(export_core), !is.na(age))
+.ph_f <- if (stage_ok) {
+  .ph_d <- .ph_d %>% filter(!is.na(stage_simple))
+  Surv(OS.time, OS) ~ export_core + age + strata(stage_simple)
+} else Surv(OS.time, OS) ~ export_core + age
+.ph <- cox.zph(coxph(.ph_f, data = .ph_d))
+say("\n=== proportional hazards (cox.zph), n = %d ===", nrow(.ph_d))
+print(round(.ph$table, 4))
+say("  a small p means that term's effect changes over follow-up")
+write_csv(tibble::rownames_to_column(as.data.frame(.ph$table), "term"),
+          file.path(OUT, "cox_zph.csv"))
+
 # ==============================================================================
 # 4. THE KEY TEST: does SLC16A3 (export) add value OVER SPP1 alone?
 # ==============================================================================
@@ -200,10 +216,15 @@ if (hpv_col %in% names(df) && any(!is.na(df$hpv))) {
   has_site <- "icd10" %in% names(dh) && any(!is.na(dh$icd10))
   if (has_site) {
     dh <- dh %>% mutate(site = case_when(
-      grepl("C0[0-6]", icd10) ~ "oral_cavity",
-      grepl("C09|C10|C01", icd10) ~ "oropharynx",
-      grepl("C32", icd10) ~ "larynx",
-      grepl("C12|C13", icd10) ~ "hypopharynx", TRUE ~ "other"))
+      # C01 (base of tongue) is oropharynx, not oral cavity, and must be matched
+      # BEFORE the C00-C06 rule or case_when captures it as oral cavity. With
+      # tonsil (C09) it is where HPV-positive disease concentrates, so the order
+      # determines who is in the within-oropharynx comparison below.
+      grepl("C01|C09|C10", icd10) ~ "oropharynx",
+      grepl("C0[0-6]", icd10)     ~ "oral_cavity",
+      grepl("C32", icd10)         ~ "larynx",
+      grepl("C12|C13", icd10)     ~ "hypopharynx",
+      TRUE ~ "other"))
     say("  ICD-10 sub-sites: %s",
         paste(names(table(dh$site)), table(dh$site), collapse="  "))
   } else say("  no ICD site proxy available")
