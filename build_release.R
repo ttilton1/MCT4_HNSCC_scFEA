@@ -170,7 +170,7 @@ if (WITH_FLUX) paste(c(
 "patient and tissue are combined by n_cells-weighted mean, so there are fewer",
 "rows than pseudobulk units.",
 "",
-"WHAT IS NOT HERE",
+"LEFT OUT OF THESE FILES",
 "",
 "Units from the He cohort (HRA004648) are withheld. That dataset is controlled",
 "access and readers should apply to the original repository directly. Because",
