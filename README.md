@@ -1,4 +1,7 @@
 # MCT4-associated lactate export in HNSCC myeloid cells
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23696767.svg)](https://doi.org/10.5281/zenodo.23696767)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.CONCEPT_ID.svg)](https://doi.org/10.5281/zenodo.CONCEPT_ID)
+
 
 Analysis code for:
 
