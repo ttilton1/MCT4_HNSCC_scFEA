@@ -3,8 +3,8 @@
 
 Analysis code for:
 
-> Tilton T, Park YM, Zhu H, Zhang C, Lin D-C. *MCT4-Associated Lactate Export Defines
-> Myeloid Metabolic Reprogramming during Head and Neck Cancer Progression.*
+> Tilton T, Park YM, Zhu H, Paolillo J, Zhang C, Lin D-C. *MCT4-Associated Lactate Export
+> Defines Myeloid Metabolic Reprogramming during Head and Neck Cancer Progression.*
 > bioRxiv 2026. https://doi.org/10.64898/2026.10.13.758108
 
 We infer metabolic flux with [scFEA](https://github.com/changwn/scFEA) across 168 modules
@@ -213,9 +213,26 @@ External validation cohorts: GSE139324 (Cillo), GSE164690 (Kürten).
 Proteomics: CPTAC-HNSCC through the `cptac` Python package. Survival and bulk expression:
 TCGA-HNSC through cBioPortal.
 
-Pseudobulk expression inputs and inferred flux for the four GEO cohorts are deposited at
-https://doi.org/10.5281/zenodo.23698042. The He cohort (HRA004648) is controlled access and
-is not included there.
+### Public deposit
+
+Pseudobulk expression inputs for the four GEO cohorts, and inferred flux for all five
+cohorts including He, are deposited at https://doi.org/10.5281/zenodo.23698041. That DOI
+always resolves to the current version.
+
+Pseudobulk expression for HRA004648 is not redistributed, because that cohort is
+controlled access. Inferred flux is a derived model output rather than the source data, so
+it is released for every cohort. That means the paired progression analyses reported in
+the paper can be reproduced from the deposit, while re-running flux inference for He from
+expression requires an approved request to HRA004648.
+
+Tissue labels in the deposited flux tables are as the source cohorts provide them (NL,
+Pre, LP, CA-A, CA-E, CA, LN-in, LN-out, LN-normal, M, R). `config_all_sites.R` holds the
+mapping onto the four classes used in the paper and the exclusion of lymph node,
+metastatic and recurrent tissue.
+
+`build_release.R` assembles the deposit from `$SCFEA_ROOT` into `$SCFEA_ROOT/release/`.
+Run it with `--with-flux` for the full deposit; without that flag it writes the pseudobulk
+inputs only. Every unit released contains at least 10 cells, in both arms of the output.
 
 ---
 
