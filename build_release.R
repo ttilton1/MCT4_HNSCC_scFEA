@@ -7,17 +7,25 @@
 # Takes the pseudobulk scFEA inputs, drops every unit from the He cohort
 # (HRA004648, controlled access), and writes the remainder to release/.
 #
+# Inferred flux (--with-flux) is released for all five cohorts, He included.
+# Flux is a derived model output rather than the dataset: 168 module values
+# produced by MAGIC imputation and a graph neural network, aggregated over at
+# least 10 cells per unit, and not invertible back to expression. The He
+# expression inputs stay withheld. See FLUX_ALL below.
+#
 # in   data/input/all_sites/bulk_before/<Type>/train_expression.csv
 #      metadata/all_sites/bulk_before/<Type>/metadata_units.csv
 #      data/combined_wide/all_sites/bulk_before/cw_finaltype.rds   (--with-flux)
 # out  release/pseudobulk/<Type>/train_expression.csv
 #      release/pseudobulk/<Type>/metadata_units.csv
-#      release/flux/cw_finaltype_public.csv                        (--with-flux)
+#      release/flux/cw_finaltype.csv, release/flux/cw_subtype.csv  (--with-flux)
+#      release/flux/usable_modules.csv                             (--with-flux)
 #      release/README.txt
 #      release/unit_counts.csv
 #
-# Nothing is modified in place. Every He unit is dropped before anything is
-# written, and the per-type counts are printed so the exclusion is auditable.
+# Nothing is modified in place. Every He unit is dropped from pseudobulk/ before
+# anything is written, and the per-type counts are printed so the exclusion is
+# auditable.
 
 suppressPackageStartupMessages({
   library(data.table); library(dplyr); library(readr)
@@ -27,7 +35,12 @@ ROOT <- Sys.getenv("SCFEA_ROOT", unset = "")
 if (ROOT == "") stop("set SCFEA_ROOT to the data directory")
 
 ARM       <- "bulk_before"
-EXCLUDE   <- "He"                 # HRA004648: controlled access, not redistributable
+EXCLUDE   <- "He"                 # HRA004648: controlled access. Withheld from
+                                  # pseudobulk/ (expression) only.
+FLUX_ALL  <- TRUE                 # inferred flux is a derived model output, not
+                                  # the dataset, and is released for every
+                                  # cohort. Set FALSE to withhold He from flux
+                                  # as well.
 MIN_CELLS <- 10                   # see note below -- this gate is a disclosure
                                   # control, not just a quality filter
 
@@ -38,7 +51,8 @@ MIN_CELLS <- 10                   # see note below -- this gate is a disclosure
 # its cell of origin in the public GEO data, which would recover the
 # barcode-to-annotation mapping we are deliberately not releasing. Gating at 10
 # removes every unit that could be matched to an individual cell, and matches
-# what the paper analyses.
+# what the paper analyses. The gate applies to the He flux rows too, so no
+# released He unit is a single cell's profile.
 TYPES     <- c("T","Myeloid","Fibroblast","Epithelial","Endothelial",
                "B","NK","Mast","Plasma")
 WITH_FLUX <- "--with-flux" %in% commandArgs(TRUE)
@@ -48,7 +62,8 @@ dir.create(file.path(OUT, "pseudobulk"), recursive = TRUE, showWarnings = FALSE)
 say <- function(...) message(sprintf(...))
 
 say("building release from %s", ROOT)
-say("excluding cohort: %s\n", EXCLUDE)
+say("excluding cohort from pseudobulk/: %s", EXCLUDE)
+say("flux released for all cohorts: %s\n", FLUX_ALL)
 
 counts <- list()
 
@@ -94,7 +109,7 @@ for (ct in TYPES) {
 
 cnt <- bind_rows(counts)
 write_csv(cnt, file.path(OUT, "unit_counts.csv"))
-say("\ntotal: %d units released, %d withheld (He + under-gate)",
+say("\npseudobulk total: %d units released, %d withheld (He + under-gate)",
     sum(cnt$units_released), sum(cnt$withheld_He) + sum(cnt$withheld_small))
 
 # ---- optional: inferred flux for the released units --------------------------
@@ -106,13 +121,12 @@ if (WITH_FLUX) {
     p <- file.path(ROOT, "data/combined_wide/all_sites", ARM, sprintf("cw_%s.rds", lv))
     if (!file.exists(p)) { say("  skip cw_%s (not found)", lv); next }
     cw <- readRDS(p)
-    n_he    <- sum(cw$study == EXCLUDE)
-    cw      <- cw %>% filter(study != EXCLUDE)
+    if (!FLUX_ALL) cw <- cw %>% filter(study != EXCLUDE)
     n_small <- sum(cw$n_cells < MIN_CELLS)
     cw      <- cw %>% filter(n_cells >= MIN_CELLS)
     write_csv(cw, file.path(OUT, "flux", sprintf("cw_%s.csv", lv)))
-    say("  cw_%-10s %5d kept | %4d He dropped | %4d under %d cells dropped",
-        lv, nrow(cw), n_he, n_small, MIN_CELLS)
+    say("  cw_%-10s %5d kept (%d He) | %4d under %d cells dropped",
+        lv, nrow(cw), sum(cw$study == EXCLUDE), n_small, MIN_CELLS)
   }
 
   # the module filter, without which the released flux cannot be filtered the
@@ -127,8 +141,9 @@ if (WITH_FLUX) {
 
 # ---- deposit README ----------------------------------------------------------
 writeLines(c(
-"Pseudobulk scFEA inputs: MCT4-associated lactate export in HNSCC myeloid cells",
-"Tilton T, Park YM, Zhu H, Zhang C, Lin D-C. bioRxiv 2026.",
+"Pseudobulk scFEA inputs and inferred flux: MCT4-associated lactate export in",
+"HNSCC myeloid cells",
+"Tilton T, Park YM, Zhu H, Paolillo J, Zhang C, Lin D-C. bioRxiv 2026.",
 "https://doi.org/10.64898/2026.10.13.758108",
 "",
 "CONTENTS",
@@ -144,7 +159,7 @@ writeLines(c(
 "    cell count and median UMI.",
 "",
 "unit_counts.csv",
-"    Units released and withheld per cell type.",
+"    Units released and withheld per cell type, for pseudobulk/ only.",
 "",
 if (WITH_FLUX) paste(c(
 "flux/cw_finaltype.csv, flux/cw_subtype.csv",
@@ -153,6 +168,16 @@ if (WITH_FLUX) paste(c(
 "    values used in the paper, not a re-run. Running scFEA yourself on the",
 "    released inputs alone will not reproduce them, because the published model",
 "    was trained across all cohorts including He.",
+"",
+"    Released for all five cohorts, He included. Flux is a derived model output",
+"    rather than the source data: module-level values produced by MAGIC",
+"    imputation and a graph neural network, aggregated over at least 10 cells",
+"    per unit, and not invertible back to expression.",
+"",
+"    Tissue labels are as the source cohorts provide them (NL, Pre, LP, CA-A,",
+"    CA-E, CA, LN-in, LN-out, LN-normal, M, R). The mapping onto the four",
+"    classes used in the paper, and the exclusion of lymph node, metastatic and",
+"    recurrent tissue, is in config_all_sites.R in the code repository.",
 "",
 "flux/usable_modules.csv",
 "    The modules passing quality control. Analyses in the paper are restricted",
@@ -172,17 +197,21 @@ if (WITH_FLUX) paste(c(
 "",
 "LEFT OUT OF THESE FILES",
 "",
-"Units from the He cohort (HRA004648) are withheld. That dataset is controlled",
-"access and readers should apply to the original repository directly. Because",
-"He contributes to the paired progression analyses, those analyses cannot be",
-"fully reproduced from this deposit.",
+"Pseudobulk expression for the He cohort (HRA004648) is withheld. That dataset",
+"is controlled access and readers should apply to the original repository",
+"directly. Inferred flux for He IS included in flux/, so the paired progression",
+"analyses reported in the paper can be reproduced from this deposit. Re-running",
+"flux inference for He from expression requires applying to HRA004648.",
 "",
 "No single-cell data. These are pseudobulk aggregates of at least 10 cells each,",
 "and no barcode-level annotation is included.",
 "",
 "SOURCE COHORTS REPRESENTED HERE",
 "",
-"GSE181919 (Kim), GSE198315 (Koh), GSE234933 (Pittet), GSE182227 (Tirosh).",
+"pseudobulk/: GSE181919 (Kim), GSE198315 (Koh), GSE234933 (Pittet),",
+"GSE182227 (Tirosh).",
+"",
+"flux/: the four above plus HRA004648 (He).",
 "",
 "CODE",
 "",
@@ -191,3 +220,4 @@ if (WITH_FLUX) paste(c(
 
 say("\n-> %s", OUT)
 say("Check unit_counts.csv and README.txt before depositing.")
+say("Confirm He appears in flux/ and nowhere under pseudobulk/.")
